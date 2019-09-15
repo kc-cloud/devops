@@ -1,1 +1,0 @@
-docker run -d -p 3306:3306 --name devops-mysql -v "$(pwd)/data":/var/lib/mysql -e MYSQL_ROOT_PASSWORD=welcome1 devops-mysql
