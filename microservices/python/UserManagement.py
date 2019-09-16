@@ -26,6 +26,7 @@ def index():
 
 @app.route('/users/add', methods=['POST'])
 def add_user():
+	conn = None
 	try:
 		request_payload = request.json
 		user_name = request_payload['name']
@@ -47,11 +48,12 @@ def add_user():
 	except Exception as e:
 		print(e)
 	finally:
-		cursor.close() 
-		conn.close()
+		if conn:
+			conn.close()
 		
 @app.route('/users')
 def users():
+	conn = None
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -63,11 +65,12 @@ def users():
 	except Exception as e:
 		print(e)
 	finally:
-		cursor.close()
-		conn.close()
+		if conn:
+			conn.close()
 		
 @app.route('/users/<id>')
 def user(id):
+	conn = None
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -79,11 +82,12 @@ def user(id):
 	except Exception as e:
 		print(e)
 	finally:
-		cursor.close()
-		conn.close()
+		if conn:
+			conn.close()
 
 @app.route('/users/update', methods=['POST'])
 def update_user():
+	conn = None
 	try:
 		request_payload = request.json
 		user_id = request_payload['id']
@@ -106,11 +110,12 @@ def update_user():
 	except Exception as e:
 		print(e)
 	finally:
-		cursor.close() 
-		conn.close()
+		if conn:
+			conn.close()
 		
 @app.route('/users/delete/<id>')
 def delete_user(id):
+	conn = None
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor()
@@ -139,4 +144,4 @@ def not_found(error=None):
     return response_payload
 		
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')
