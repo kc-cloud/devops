@@ -43,9 +43,9 @@
    - name: Set Node-IP
      lineinfile:
        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-       regexp: '^ExecStart='
-       insertbefore: '^ExecStart='
-       line: "KUBELET_EXTRA_ARGS=--node-ip={{ansible_host}}"
+       regexp: '^Environment='
+       insertafter: '^Environment='
+       line: Environment="KUBELET_EXTRA_ARGS=--node-ip={{ansible_host}}"
 
    - name: start docker
      systemd: name=docker state=started enabled=yes masked=no
