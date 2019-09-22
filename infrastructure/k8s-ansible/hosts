@@ -1,9 +1,9 @@
 [masters]
-k8s-master ansible_host=192.168.10.10 ansible_user=vagrant ansible_ssh_private_key_file=/home/kannan/.vagrant.d/insecure_private_key
+k8s-master ansible_host=192.168.10.10 ansible_user=vagrant ansible_ssh_private_key_file=/Users/kannanc/.vagrant.d/insecure_private_key
 
 [workers]
-k8s-worker1 ansible_host=192.168.10.11 ansible_user=vagrant ansible_ssh_private_key_file=/home/kannan/.vagrant.d/insecure_private_key
-k8s-worker2 ansible_host=192.168.10.12 ansible_user=vagrant ansible_ssh_private_key_file=/home/kannan/.vagrant.d/insecure_private_key
+k8s-worker1 ansible_host=192.168.10.11 ansible_user=vagrant ansible_ssh_private_key_file=/Users/kannanc/.vagrant.d/insecure_private_key
+k8s-worker2 ansible_host=192.168.10.12 ansible_user=vagrant ansible_ssh_private_key_file=/Users/kannanc/.vagrant.d/insecure_private_key
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python

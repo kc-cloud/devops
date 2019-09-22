@@ -31,13 +31,13 @@
 
    - name: install kubelet
      apt:
-       name: kubelet
+       name: kubelet=1.15.0
        state: present
        update_cache: true
 
    - name: install kubeadm
      apt:
-       name: kubeadm
+       name: kubeadm=1.15.0
        state: present
 
    - name: start docker
@@ -66,6 +66,6 @@
   tasks:
    - name: install kubectl
      apt:
-       name: kubectl
+       name: kubectl=1.15.0
        state: present
        force: yes

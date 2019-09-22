@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta2
+kind: ReplicaSet
+metadata:
+  name: flask-rc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: devops-flask
+  template:
+    metadata:
+      labels:
+        app: devops-flask
+    spec:
+      containers:
+        - name: devops-flask
+          image: kannanc70/devops-flask
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+    
