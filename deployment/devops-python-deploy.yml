@@ -1,15 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Deployment                                
 metadata:
-  name: devops-python
-  labels:
-    app: devops-python
+  name: user-management
 spec:
   replicas: 3
   template:
     metadata:
       labels:
-        app: devops-python
+        app: devops-user-api
     spec:
       containers:
         - image: kannanc70/devops-python
@@ -34,4 +32,6 @@ spec:
                   name: secrets
                   key: db_password
             - name: db_host
-              value: devops-mysql-service
+              value: devops-mysql
+            - name: FLASK_DEBUG
+              value: '1'

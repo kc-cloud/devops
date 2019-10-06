@@ -8,12 +8,6 @@ app = Flask(__name__)
 
 mysql = MySQL()
 
-# MySQL configurations
-# os.environ['db_username']= 'root'
-# os.environ['db_password'] = 'welcome1'
-# os.environ['db_name'] = 'DEVOPS_USERS'
-# os.environ['db_host'] = 'devops-mysql'
-
 app.config['MYSQL_DATABASE_USER'] = os.environ['db_username']
 app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['db_password']
 app.config['MYSQL_DATABASE_DB'] = os.environ['db_name']
@@ -27,6 +21,7 @@ def index():
 @app.route('/users/add', methods=['POST'])
 def add_user():
 	conn = None
+	response_payload = jsonify('No data found')
 	try:
 		request_payload = request.json
 		user_name = request_payload['name']
@@ -42,52 +37,57 @@ def add_user():
 			conn.commit()
 			response_payload = jsonify('User added successfully!')
 			response_payload.status_code = 200
-			return response_payload
 		else:
-			return not_found()
+			response_payload = not_found()
 	except Exception as e:
-		print(e)
+		response_payload = jsonify(e)
 	finally:
 		if conn:
 			conn.close()
+	return response_payload
 		
 @app.route('/users')
 def users():
 	conn = None
+	response_payload = jsonify('No data found')
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor(pymysql.cursors.DictCursor)
 		cursor.execute("SELECT * FROM users")
 		rows = cursor.fetchall()
-		response_payload = jsonify(rows)
+		if rows and len(rows) > 0:
+			response_payload = jsonify(rows)
 		response_payload.status_code = 200
-		return response_payload
 	except Exception as e:
-		print(e)
+		response_payload = jsonify(e)
 	finally:
 		if conn:
 			conn.close()
+	return response_payload
 		
 @app.route('/users/<id>')
 def user(id):
 	conn = None
+	response_payload = jsonify('No data found')
 	try:
 		conn = mysql.connect()
 		cursor = conn.cursor(pymysql.cursors.DictCursor)
 		cursor.execute("SELECT * FROM users WHERE user_id=%s", id)
 		row = cursor.fetchone()
-		response_payload = jsonify(row)
+		if row and len(row) > 0:
+			response_payload = jsonify(row)
 		response_payload.status_code = 200
-		return response_payload
 	except Exception as e:
-		print(e)
+		response_payload = jsonify(e)
 	finally:
 		if conn:
 			conn.close()
+	return response_payload
 
 @app.route('/users/update', methods=['POST'])
 def update_user():
 	conn = None
+	response_payload = jsonify('No record updated')
 	try:
 		request_payload = request.json
 		user_id = request_payload['id']
@@ -104,14 +104,14 @@ def update_user():
 			conn.commit()
 			response_payload = jsonify('User updated successfully!')
 			response_payload.status_code = 200
-			return response_payload
 		else:
-			return not_found()
+			response_payload = not_found()
 	except Exception as e:
-		print(e)
+		response_payload = jsonify(e)
 	finally:
 		if conn:
 			conn.close()
+	return response_payload
 		
 @app.route('/users/delete/<id>')
 def delete_user(id):
@@ -120,17 +120,15 @@ def delete_user(id):
 		conn = mysql.connect()
 		cursor = conn.cursor()
 		cursor.execute("DELETE FROM users WHERE user_id=%s", (id,))
-		print ('deleted')
 		conn.commit()
-		print ('committed')
 		response_payload = jsonify('User deleted successfully!')
 		response_payload.status_code = 200
-		return response_payload
 	except Exception as e:
-		print(e)
+		response_payload = jsonify(e)
 	finally:
 		if conn:
 			conn.close()
+	return response_payload
 		
 @app.errorhandler(404)
 def not_found(error=None):

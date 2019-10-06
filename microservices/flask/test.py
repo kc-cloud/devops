@@ -61,7 +61,7 @@ def update_user():
     response_payload = jsonify('User updated successfully!')
     response_payload.status_code = 200
     return response_payload
-        
+
 @app.route('/users/delete/<name>')
 def delete_user(name):
     del users[name]

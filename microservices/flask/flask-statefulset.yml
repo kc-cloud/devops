@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: ss-flask-app-v1
+spec:
+  serviceName: flask
+  replicas: 2
+  template:
+    metadata:
+      name: ss-devops-flask
+      labels:
+        app: ss-devops-flask
+        env: ss-dev
+        tech: ss-python
+    spec:
+      containers:
+        - image: kannanc70/devops-flask
+          name: ss-devops-flask
+          ports:
+            - containerPort: 5000
+              protocol: TCP

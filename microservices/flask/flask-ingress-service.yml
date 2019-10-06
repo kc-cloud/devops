@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: flask-ingress-service
+spec:
+  rules: 
+    - host: kc.test.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: flask-nodeport-service
+              servicePort: 80
