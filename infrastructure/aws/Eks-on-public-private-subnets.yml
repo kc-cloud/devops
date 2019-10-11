@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Amazon EKS Sample VPC - Private and Public subnets'
+Description: 'Amazon EKS VPC - Private and Public subnets'
 
 Parameters:
 
@@ -29,11 +29,15 @@ Parameters:
     Default: 10.10.21.0/24
     Description: CidrBlock for private subnet 02 within the VPC
 
+  ClusterName:
+    Type: String
+    Default: 'kCluster'
+    Description: Name of the EKS Cluster
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Worker Network Configuration"
         Parameters:
           - VpcBlock
@@ -41,6 +45,10 @@ Metadata:
           - PublicSubnet02Block
           - PrivateSubnet01Block
           - PrivateSubnet02Block
+      - Label:
+          default: "EKS Cluster Configuration"
+        Parameters:
+          - ClusterName
 
 Resources:
   VPC:
@@ -265,6 +273,20 @@ Resources:
     Properties:
       GroupDescription: Cluster communication with worker nodes
       VpcId: !Ref VPC
+
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Ref ClusterName
+      RoleArn: arn:aws:iam::612474429126:role/EKSServiceRole
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+        - Ref: ControlPlaneSecurityGroup
+        SubnetIds:
+        - Ref: PublicSubnet01
+        - Ref: PublicSubnet02
+        - Ref: PrivateSubnet01
+        - Ref: PrivateSubnet02
 
 Outputs:
 
