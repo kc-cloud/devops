@@ -60,6 +60,8 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub '${AWS::StackName}-VPC'
+      - Key: !Sub kubernetes.io/cluster/${ClusterName}
+        Value: shared
 
   InternetGateway:
     Type: "AWS::EC2::InternetGateway"
