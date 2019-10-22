@@ -185,6 +185,8 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub "${AWS::StackName}-PublicSubnet01"
+      - Key: !Sub kubernetes.io/role/elb
+        Value: 1
 
   PublicSubnet02:
     Type: AWS::EC2::Subnet
@@ -203,6 +205,8 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub "${AWS::StackName}-PublicSubnet02"
+      - Key: !Sub kubernetes.io/role/elb
+        Value: 1
 
   PrivateSubnet01:
     Type: AWS::EC2::Subnet
@@ -223,6 +227,8 @@ Resources:
         Value: !Sub "${AWS::StackName}-PrivateSubnet01"
       - Key: kubernetes.io/role/internal-elb
         Value: 1
+      - Key: !Sub kubernetes.io/cluster/${ClusterName}
+        Value: shared
 
   PrivateSubnet02:
     Type: AWS::EC2::Subnet
@@ -243,6 +249,8 @@ Resources:
         Value: !Sub "${AWS::StackName}-PrivateSubnet02"
       - Key: kubernetes.io/role/internal-elb
         Value: 1
+      - Key: !Sub kubernetes.io/cluster/${ClusterName}
+        Value: shared
 
   PublicSubnet01RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
