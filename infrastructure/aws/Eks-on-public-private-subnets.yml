@@ -322,12 +322,12 @@ Outputs:
 
   EKSSecurityGroups:
     Description: Security group for the cluster control plane communication with worker nodes
-    Value: !Ref ControlPlaneSecurityGroup 
+    Value: !GetAtt ControlPlaneSecurityGroup.GroupId
     Export:
-      Name: !Sub ${AWS::StackName}-ControlPlaneSecurityGroup
+      Name: !Sub ${AWS::StackName}-ControlPlaneSecurityGroupID
 
   VpcId:
     Description: The VPC Id
     Value: !Ref VPC
     Export:
-      Name: !Sub ${AWS::StackName}-VPC
+      Name: !Sub ${AWS::StackName}-VPC-ID

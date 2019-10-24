@@ -4,9 +4,15 @@ Description: Amazon EKS - Node Group
 
 Parameters:
 
+  ClusterStack:
+    Description: Name of the stack that create the VPC
+    Type: String
+    Default: kcluster-stack
+
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
+    Default: eks-key
 
   NodeImageId:
     Description: AMI id for the node instances.
@@ -30,7 +36,7 @@ Parameters:
   NodeAutoScalingGroupMaxSize:
     Description: Maximum size of Node Group ASG. Set to at least 1 greater than NodeAutoScalingGroupDesiredCapacity.
     Type: Number
-    Default: 2
+    Default: 3
 
   NodeAutoScalingGroupDesiredCapacity:
     Description: Desired capacity of Node Group ASG.
@@ -57,18 +63,6 @@ Parameters:
     Type: String
     Default: kcluster-nodes
 
-  ClusterControlPlaneSecurityGroup:
-    Description: The security group of the cluster control plane.
-    Type: AWS::EC2::SecurityGroup::Id
-
-  VpcId:
-    Description: The VPC of the worker instances
-    Type: AWS::EC2::VPC::Id
-
-  Subnets:
-    Description: The subnets where workers can be created.
-    Type: List<AWS::EC2::Subnet::Id>
-
 Metadata:
 
   AWS::CloudFormation::Interface:
@@ -76,8 +70,8 @@ Metadata:
       - Label:
           default: EKS Cluster
         Parameters:
+          - ClusterStack
           - ClusterName
-          - ClusterControlPlaneSecurityGroup
       - Label:
           default: Worker Node Configuration
         Parameters:
@@ -90,11 +84,6 @@ Metadata:
           - NodeVolumeSize
           - KeyName
           - BootstrapArguments
-      - Label:
-          default: Worker Network Configuration
-        Parameters:
-          - VpcId
-          - Subnets
 
 Resources:
 
@@ -125,7 +114,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for all nodes in the cluster
-      VpcId: !Ref VpcId
+      VpcId:
+        Fn::ImportValue: !Sub '${ClusterStack}-VPC-ID'
       Tags:
         - Key: !Sub kubernetes.io/cluster/${ClusterName}
           Value: owned
@@ -147,7 +137,8 @@ Resources:
     Properties:
       Description: Allow worker Kubelets and pods to receive communication from the cluster control plane
       GroupId: !Ref NodeSecurityGroup
-      SourceSecurityGroupId: !Ref ClusterControlPlaneSecurityGroup
+      SourceSecurityGroupId: 
+        Fn::ImportValue: !Sub '${ClusterStack}-ControlPlaneSecurityGroupID'
       IpProtocol: tcp
       FromPort: 1025
       ToPort: 65535
@@ -157,7 +148,8 @@ Resources:
     DependsOn: NodeSecurityGroup
     Properties:
       Description: Allow the cluster control plane to communicate with worker Kubelet and pods
-      GroupId: !Ref ClusterControlPlaneSecurityGroup
+      GroupId:
+        Fn::ImportValue: !Sub '${ClusterStack}-ControlPlaneSecurityGroupID'
       DestinationSecurityGroupId: !Ref NodeSecurityGroup
       IpProtocol: tcp
       FromPort: 1025
@@ -169,7 +161,8 @@ Resources:
     Properties:
       Description: Allow pods running extension API servers on port 443 to receive communication from cluster control plane
       GroupId: !Ref NodeSecurityGroup
-      SourceSecurityGroupId: !Ref ClusterControlPlaneSecurityGroup
+      SourceSecurityGroupId:
+        Fn::ImportValue: !Sub '${ClusterStack}-ControlPlaneSecurityGroupID'
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
@@ -179,7 +172,8 @@ Resources:
     DependsOn: NodeSecurityGroup
     Properties:
       Description: Allow the cluster control plane to communicate with pods running extension API servers on port 443
-      GroupId: !Ref ClusterControlPlaneSecurityGroup
+      GroupId:
+        Fn::ImportValue: !Sub '${ClusterStack}-ControlPlaneSecurityGroupID'
       DestinationSecurityGroupId: !Ref NodeSecurityGroup
       IpProtocol: tcp
       FromPort: 443
@@ -190,7 +184,8 @@ Resources:
     DependsOn: NodeSecurityGroup
     Properties:
       Description: Allow pods to communicate with the cluster API Server
-      GroupId: !Ref ClusterControlPlaneSecurityGroup
+      GroupId:
+        Fn::ImportValue: !Sub '${ClusterStack}-ControlPlaneSecurityGroupID'
       SourceSecurityGroupId: !Ref NodeSecurityGroup
       IpProtocol: tcp
       ToPort: 443
@@ -203,7 +198,9 @@ Resources:
       LaunchConfigurationName: !Ref NodeLaunchConfig
       MinSize: !Ref NodeAutoScalingGroupMinSize
       MaxSize: !Ref NodeAutoScalingGroupMaxSize
-      VPCZoneIdentifier: !Ref Subnets
+      VPCZoneIdentifier:
+        - Fn::ImportValue: !Sub '${ClusterStack}-PrivateSubnet01'
+        - Fn::ImportValue: !Sub '${ClusterStack}-PrivateSubnet02'
       Tags:
         - Key: Name
           Value: !Sub ${ClusterName}-${NodeGroupName}-Node
@@ -245,11 +242,11 @@ Resources:
                      --region ${AWS::Region}
 
 Outputs:
-
   NodeInstanceRole:
     Description: The node instance role
     Value: !GetAtt NodeInstanceRole.Arn
-
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRole
   NodeSecurityGroup:
     Description: The security group for the node group
     Value: !Ref NodeSecurityGroup
